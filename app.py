@@ -20,7 +20,7 @@ def generate_qrcode():
     weight = data['weight'].lower()
     man_name = data['man_name'].lower()
     
-    url = f"http://127.0.0.1:5000/products/{product_name}/{location}/{date}/{batch_number}/{serial_number}"
+    url = f"https://qr-code-blockchain-1d.vercel.app/products/{product_name}/{location}/{date}/{batch_number}/{serial_number}"
     
     hash_obj = hashlib.sha256()
     hash_obj.update(url.encode())
@@ -64,7 +64,7 @@ def keep_alive():
 def send_dummy_request():
     try:
         # Replace 'http://your-domain.com/keep_alive' with your deployed API URL
-        response = requests.get('https://medisense-backend.onrender.com/keep_alive')
+        response = requests.get('https://qr-code-blockchain-1d-backend.onrender.com/keep_alive')
         print(f"Keep-alive request sent: {response.status_code}")
     except Exception as e:
         print(f"Failed to send keep-alive request: {e}")
