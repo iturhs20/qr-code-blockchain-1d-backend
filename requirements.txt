@@ -5,3 +5,5 @@ APScheduler
 requests
 Pillow
 gunicorn
+Werkzeug
+zxing
