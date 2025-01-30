@@ -86,7 +86,7 @@ def read_qr_code(image_path):
         return {"error": "No QR code detected"}
 
 # API route for QR code processing
-@app.route("/upload_qr", methods=["POST"])
+@app.route('/upload_qr', methods=["POST"])
 def upload_qr():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
