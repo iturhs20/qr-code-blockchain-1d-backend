@@ -7,4 +7,3 @@ Pillow
 gunicorn
 Werkzeug
 zxing
-python-zxing
