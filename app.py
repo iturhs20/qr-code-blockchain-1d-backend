@@ -51,11 +51,66 @@ def generate_qrcode():
         })
     
     
+# from werkzeug.utils import secure_filename
+# import os
+# import zxing
+# import re
+
+
+# # Configure upload folder
+# UPLOAD_FOLDER = "uploads"
+# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# # Function to read QR code from image
+# def read_qr_code(image_path):
+#     reader = zxing.BarCodeReader()
+#     barcode = reader.decode(image_path)
+    
+#     if barcode:
+#         qr_data = barcode.raw
+#         print("QR Code Data:", qr_data)
+
+#         # Regex to extract product_name and serial_number
+#         pattern = r"https://[^/]+/products/([^/]+)/[^/]+/[^/]+/[^/]+/([^/]+)"
+#         match = re.match(pattern, qr_data)
+
+#         if match:
+#             product_name = match.group(1)
+#             serial_number = match.group(2)
+#             formatted_string = f"{product_name}_{serial_number}"
+#             return {"url": qr_data, "formatted_string": formatted_string}
+#         else:
+#             return {"error": "URL format does not match expected pattern."}
+#     else:
+#         return {"error": "No QR code detected"}
+
+# # API route for QR code processing
+# @app.route('/upload_qr', methods=["POST"])
+# def upload_qr():
+#     if "file" not in request.files:
+#         return jsonify({"error": "No file uploaded"}), 400
+    
+#     file = request.files["file"]
+
+#     if file.filename == "":
+#         return jsonify({"error": "No selected file"}), 400
+    
+#     filename = secure_filename(file.filename)
+#     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+#     file.save(file_path)
+
+#     result = read_qr_code(file_path)
+#     return jsonify(result)
+
+
+
+
 from werkzeug.utils import secure_filename
 import os
-import zxing
 import re
-
+import cv2
+import numpy as np
 
 # Configure upload folder
 UPLOAD_FOLDER = "uploads"
@@ -64,26 +119,37 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # Function to read QR code from image
 def read_qr_code(image_path):
-    reader = zxing.BarCodeReader()
-    barcode = reader.decode(image_path)
-    
-    if barcode:
-        qr_data = barcode.raw
-        print("QR Code Data:", qr_data)
-
-        # Regex to extract product_name and serial_number
-        pattern = r"https://[^/]+/products/([^/]+)/[^/]+/[^/]+/[^/]+/([^/]+)"
-        match = re.match(pattern, qr_data)
-
-        if match:
-            product_name = match.group(1)
-            serial_number = match.group(2)
-            formatted_string = f"{product_name}_{serial_number}"
-            return {"url": qr_data, "formatted_string": formatted_string}
+    try:
+        # Read image using OpenCV
+        image = cv2.imread(image_path)
+        
+        if image is None:
+            return {"error": "Failed to load image"}
+        
+        # Initialize QR Code detector
+        qr_detector = cv2.QRCodeDetector()
+        
+        # Detect and decode QR code
+        data, bbox, _ = qr_detector.detectAndDecode(image)
+        
+        if data:
+            print("QR Code Data:", data)
+            
+            # Regex to extract product_name and serial_number
+            pattern = r"https://[^/]+/products/([^/]+)/[^/]+/[^/]+/[^/]+/([^/]+)"
+            match = re.match(pattern, data)
+            
+            if match:
+                product_name = match.group(1)
+                serial_number = match.group(2)
+                formatted_string = f"{product_name}_{serial_number}"
+                return {"url": data, "formatted_string": formatted_string}
+            else:
+                return {"error": "URL format does not match expected pattern."}
         else:
-            return {"error": "URL format does not match expected pattern."}
-    else:
-        return {"error": "No QR code detected"}
+            return {"error": "No QR code detected"}
+    except Exception as e:
+        return {"error": f"Error processing image: {str(e)}"}
 
 # API route for QR code processing
 @app.route('/upload_qr', methods=["POST"])
