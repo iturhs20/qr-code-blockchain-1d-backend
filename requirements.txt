@@ -6,4 +6,4 @@ requests
 Pillow
 gunicorn
 Werkzeug
-zxing
+opencv-python
